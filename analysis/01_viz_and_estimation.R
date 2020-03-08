@@ -27,9 +27,6 @@ dt <- read.csv(paste0(indir, "prepped_data.csv"))
 dt1981 <- dt %>%
   filter(year == 1981)
 
-# check to make sure each of the clusters are unique for lat long 
-nrow(unique(dplyr::select(totalDF, latnum, longnum)))
-
 d <- dt1981 %>%
   group_by(lat, lon) %>%
   dplyr::select(
