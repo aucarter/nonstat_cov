@@ -1,6 +1,14 @@
 rm(list=ls())
 indir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/3rdYear/Winter/STAT517/Final_project/nonstat_cov/data/"
 
+libs <- c('data.table','ggplot2','dplyr','tidyr','INLA')
+for(l in libs){
+  if(!require(l,character.only = TRUE, quietly = TRUE)){
+    message( sprintf('Did not have the required package << %s >> installed. Downloading now ... ',l))
+    install.packages(l) 
+  }
+  library(l, character.only = TRUE, quietly = TRUE)
+}
 
 yr <- 1981
 type <- "ppt"
@@ -180,15 +188,31 @@ dpm <- dpm %>%
   mutate(variable = as.factor(dpm$variable))
 
 
-dpm %>% 
+p <- dpm %>% 
   filter( variable == "est_mean" | variable == "pred_mean") %>%
   ggplot(aes(x = east, y = north, color = value)) +
   facet_wrap(~tag, nrow = 1) +
   geom_point(size = 1, alpha = 0.5) +
   scale_color_gradient(
-    name = "Rainfall",
-    low = "blue", high = "orange"
-  )
+    name = "Rain",
+    low = "blue", high = "yellow"
+  ) +
+  theme_bw()
+
+ggsave(p, filename =  paste0(indir, "pred.png"))
+
+
+p1 <- dpm %>% 
+  filter( tag == "pred") %>%
+  ggplot(aes(x = east, y = north, color = value)) +
+  facet_wrap(~variable, nrow = 1) +
+  geom_point(size = 1, alpha = 0.5) +
+  scale_color_gradient(
+    name = "Rain",
+    low = "blue", high = "yellow"
+  ) +
+  theme_bw()
+ggsave(p1, filename =  paste0(indir, "predAndCI.png"))
 
 p <- dpm %>% 
   filter( variable == "pred_mean") %>%
@@ -202,29 +226,30 @@ p <- dpm %>%
 dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/3rdYear/Winter/STAT517/Final_project/code/"
 ggsave(p, paste0(dir,"predPlot.png"))
 # 
-# rang <- apply(mesh$loc[, c(1, 2)], 2, range)
-# proj <- inla.mesh.projector(mesh,
-#                             xlim = rang[, 1], ylim = rang[, 2],
-#                             dims = c(300, 300)
-# )
-# mean_s <- inla.mesh.project(proj, res$summary.random$s$mean)
-# sd_s <- inla.mesh.project(proj, res$summary.random$s$sd)
+rang <- apply(mesh$loc[, c(1, 2)], 2, range)
+proj <- inla.mesh.projector(mesh,
+                            xlim = rang[, 1], ylim = rang[, 2],
+                            dims = c(300, 300)
+)
+mean_s <- inla.mesh.project(proj, res$summary.random$mesh.idx$mean)
+sd_s <- inla.mesh.project(proj, res$summary.random$mesh.idx$sd)
 # 
-# df <- expand.grid(x = proj$x, y = proj$y)
-# df$mean_s <- as.vector(mean_s)
-# df$sd_s <- as.vector(sd_s)
-# 
-# library(viridis)
-# library(cowplot)
-# 
-# gmean <- ggplot(df, aes(x = x, y = y, fill = mean_s)) +
-#   geom_raster() +
-#   scale_fill_viridis(na.value = "transparent") +
-#   coord_fixed(ratio = 1) + theme_bw()
-# 
-# gsd <- ggplot(df, aes(x = x, y = y, fill = sd_s)) +
-#   geom_raster() +
-#   scale_fill_viridis(na.value = "transparent") +
-#   coord_fixed(ratio = 1) + theme_bw()
-# 
-# plot_grid(gmean, gsd)
+df <- expand.grid(x = proj$x, y = proj$y)
+df$mean_s <- as.vector(mean_s)
+df$sd_s <- as.vector(sd_s)
+
+library(viridis)
+library(cowplot)
+
+gmean <- ggplot(df, aes(x = x, y = y, fill = mean_s)) +
+  geom_raster() +
+  scale_fill_viridis(na.value = "transparent") +
+  coord_fixed(ratio = 1) + theme_bw()
+
+gsd <- ggplot(df, aes(x = x, y = y, fill = sd_s)) +
+  geom_raster() +
+  scale_fill_viridis(na.value = "transparent") +
+  coord_fixed(ratio = 1) + theme_bw()
+
+spField <- plot_grid(gmean, gsd)
+ggsave(spField, filename =  paste0(indir, "spatialField.png"))
