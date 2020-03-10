@@ -30,7 +30,6 @@ $\rho(\tilde h) = \rho(L_1||\vec s_2 - \vec s_1||)$
 
 * Local Deformation via SPDE
 
-
 ## Stationary SPDE
 
 The following equation defines a stochastic partial differential equation (SPDE), $u(\vec s)$, whose solution is the Matérn covariance function
@@ -67,7 +66,7 @@ Parameters $\kappa$ and $\mathbf{H}$ control the marginal variance and direction
 
 ## 2D-Random Walk Penalty
 
-To enforce smoothness of parameters across space, the authors introduce a second-order penalty into their model for spatially-specific covariance parameters:
+To enforce smoothness of parameters across space, the authors introduce a second-order penalty into their model for the spatially-specific covariance parameters:
 
 $$ - \Delta \beta(\vec s) = \cal W_{\beta}(\vec s) / \sqrt{\tau_{\beta}} $$
 
@@ -81,6 +80,13 @@ $$ \vec \alpha \sim \cal N_{kl}\left(\vec 0, \mathbf{Q}_{\textrm{RW2}}^{-1} / \t
 
 ## Full Hierachical Model
 
+$$
+\begin{aligned}
+& \vec y|\vec \beta, \vec u, \log(\tau_{\text{noise}}) \sim \mathcal N_N(\mathbf{X} \vec \beta + \mathbf{E}\vec u, \mathbf{I}_N/\tau_{\text{noise}}) \\
+& \vec u | \vec \alpha_1, \vec \alpha_2, \vec \alpha_3, \vec \alpha_4 \sim \mathcal N_{nm}(\vec 0, \mathbf{Q}^{-1}), \qquad \vec \beta \sim \mathcal N_p(\vec 0, \mathbf I_p/\tau_{\beta}) \\
+& \vec \alpha_i|\tau_i \sim \mathcal N_{kl}(\vec 0, \mathbf Q_{\text{RW2}}^{-1}/\tau_i) \quad \text{for } i = 1,2,3,4 
+\end{aligned}
+$$
 
 ## Stationary vs. Non-stationary Model Predictions (Authors)
 

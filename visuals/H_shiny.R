@@ -16,13 +16,13 @@ ui <- fluidPage(
                         value = 1),
             sliderInput("v_x",
                         "v_x",
-                        min = -30,
-                        max = 30,
+                        min = -10,
+                        max = 10,
                         value = 0.0),
             sliderInput("v_y",
                         "v_y",
-                        min = -30,
-                        max = 30,
+                        min = -10,
+                        max = 10,
                         value = 0.0),
 
             width = 3

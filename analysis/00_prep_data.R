@@ -29,6 +29,7 @@ dt[, log_ann_prec := log(ann_prec)]
 write.csv(dt, "data/prepped_data.csv", row.names = F)
 
 ## Plot 1981
-ggplot(dt[year == 1981], aes(x = lon, y = lat, color = elev)) + 
+ggplot(dt[year == 1981], aes(x = lon, y = lat, color = log_ann_prec)) + 
     geom_point(size = 0.1) + coord_equal() + theme_classic() +
-    scale_color_distiller(palette = "Spectral", limits = c(min(dt$elev), max(dt$elev))) 
+    scale_color_distiller(palette = "Spectral", limits = c(min(dt[year == 1981]$log_ann_prec), 
+                                                           max(dt[year == 1981]$log_ann_prec))) 
