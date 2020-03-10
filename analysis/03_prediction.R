@@ -190,6 +190,17 @@ dpm %>%
     low = "blue", high = "orange"
   )
 
+p <- dpm %>% 
+  filter( variable == "pred_mean") %>%
+  ggplot(aes(x = east, y = north, color = value)) +
+  facet_wrap(~variable, nrow = 1) +
+  geom_point(size = 1, alpha = 0.5) +
+  scale_color_gradient(
+    name = "Rainfall",
+    low = "blue", high = "orange"
+  )
+dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/3rdYear/Winter/STAT517/Final_project/code/"
+ggsave(p, paste0(dir,"predPlot.png"))
 # 
 # rang <- apply(mesh$loc[, c(1, 2)], 2, range)
 # proj <- inla.mesh.projector(mesh,
