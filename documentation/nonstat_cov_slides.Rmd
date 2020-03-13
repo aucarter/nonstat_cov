@@ -42,12 +42,7 @@ $$
 
 Where $\kappa$ and $\sigma > 0$ are constants, $\nabla = \left(\frac{\partial}{\partial x}, \frac{\partial}{\partial y}\right)^T$ and $\cal W$ is a standard Gaussian white noise process. This correlation structure is isotropic because the Laplacian, $\Delta = \nabla \cdot \nabla$ is equal to the sum of the diagonal elements of the Hessian, is invariant to a change of coordinates that involves rotation and translation. The solution to this SPDE is a class of equations that have covariance described by the Matérn covariance function.
 
-## GMRF Approximation
-
-Insert picture of GMRF approximation
-
-## Model for Non-stationarity
-
+## Introducing Anisotropy
 The authors introduce a $2 \times 2$ matrix $\mathbf{H}$ into the SPDE which acts as a transformation of the grid on top of which we are measuring distance
 $$
 \begin{aligned}
@@ -61,30 +56,43 @@ r(\vec s_1, \vec s_2) &= \frac{\sigma ^2}{4 \pi \kappa^2\sqrt{\det(\mathbf{H})}}
 \end{aligned}
 $$
 
-Parameters $\kappa$ and $\mathbf{H}$ control the marginal variance and directionality of correlation, allowing $\sigma$ to fall out of the SPDE formmula. The $\sqrt{\det(\mathbf{H})}$ that appears in the denominator of the covariance function is a consequence of the change of variable.
+Parameters $\kappa$ and $\mathbf{H}$ control the marginal variance and directionality of correlation, allowing $\sigma$ to fall out of the SPDE formula. The $\sqrt{\det(\mathbf{H})}$ that appears in the denominator of the covariance function is a consequence of the change of variable.
 
+## Non-stationary SPDE
+
+Finally, to construct a non-stationary SPDE, the authors allow $\kappa^2$ and $\mathbf{H}$ to vary over the domain. This results in global non-stationarity via the chaining together of processes with local covariance structures.
+
+$$
+\begin{aligned}
+(\kappa ^2 (\vec s)- \nabla \cdot \mathbf{H}(\vec s)\nabla) u(\vec s) =  \mathcal{W}(\vec s)
+\end{aligned}
+$$
+
+Now, the range, anisotropy and marginal variance can vary spatially.
 
 ## 2D-Random Walk Penalty
 
 To enforce smoothness of parameters across space, the authors introduce a second-order penalty into their model for the spatially-specific covariance parameters:
 
-$$ - \Delta \beta(\vec s) = \cal W_{\beta}(\vec s) / \sqrt{\tau_{\beta}} $$
+$$ - \Delta \beta(\vec s) = \mathcal W_{\beta}(\vec s) / \sqrt{\tau_{\beta}} $$
 
 where $\beta(\vec s)$ is the location-specific value for parameter $\beta$ and
 
-$$ \log(\beta(\vec s)) = \sum_{i = 1}^k\sum_{j = 1}^l \alpha_{ij}f_{ij}(\vec s)$$
+$$ \beta(\vec s) = \sum_{i = 1}^k\sum_{j = 1}^l \alpha_{ij}f_{ij}(\vec s)$$
 
-where $\{\alpha_{ij}\}$ are the parameters for real-valued basis functions $\{f_{ij}\}$.
+where $\{\alpha_{ij}\}$ are the parameters for real-valued basis functions $\{f_{ij}\}$ and $i$ and $j$ are indices of the $k\times l$ mesh.
 
-$$ \vec \alpha \sim \cal N_{kl}\left(\vec 0, \mathbf{Q}_{\textrm{RW2}}^{-1} / \tau_{\beta}\right) $$
+$$ \vec \alpha \sim \mathcal N_{kl}\left(\vec 0, \mathbf{Q}_{\textrm{RW2}}^{-1} / \tau_{\beta}\right) $$
 
 ## Full Hierachical Model
 
+This 
+
 $$
 \begin{aligned}
-& \vec y|\vec \beta, \vec u, \log(\tau_{\text{noise}}) \sim \mathcal N_N(\mathbf{X} \vec \beta + \mathbf{E}\vec u, \mathbf{I}_N/\tau_{\text{noise}}) \\
-& \vec u | \vec \alpha_1, \vec \alpha_2, \vec \alpha_3, \vec \alpha_4 \sim \mathcal N_{nm}(\vec 0, \mathbf{Q}^{-1}), \qquad \vec \beta \sim \mathcal N_p(\vec 0, \mathbf I_p/\tau_{\beta}) \\
-& \vec \alpha_i|\tau_i \sim \mathcal N_{kl}(\vec 0, \mathbf Q_{\text{RW2}}^{-1}/\tau_i) \quad \text{for } i = 1,2,3,4 
+\text{Stage 1: }& \vec y|\vec \beta, \vec u, \log(\tau_{\text{noise}}) \sim \mathcal N_N(\mathbf{X} \vec \beta + \mathbf{E}\vec u, \mathbf{I}_N/\tau_{\text{noise}}) \\
+\text{Stage 2: }& \vec u | \vec \alpha_1, \vec \alpha_2, \vec \alpha_3, \vec \alpha_4 \sim \mathcal N_{nm}(\vec 0, \mathbf{Q}^{-1}), \qquad \vec \beta \sim \mathcal N_p(\vec 0, \mathbf I_p/\tau_{\beta}) \\
+\text{Stage 3: }& \vec \alpha_i|\tau_i \sim \mathcal N_{kl}(\vec 0, \mathbf Q_{\text{RW2}}^{-1}/\tau_i) \quad \text{for } i = 1,2,3,4 
 \end{aligned}
 $$
 

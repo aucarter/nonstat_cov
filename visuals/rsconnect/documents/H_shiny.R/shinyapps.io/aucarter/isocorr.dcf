@@ -1,0 +1,12 @@
+name: isocorr
+title: isocorr
+username:
+account: aucarter
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1938437
+bundleId: 2873926
+url: https://aucarter.shinyapps.io/isocorr/
+when: 1583992071.96249
+asMultiple: FALSE
+asStatic: FALSE
