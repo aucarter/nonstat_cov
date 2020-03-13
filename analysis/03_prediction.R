@@ -62,6 +62,21 @@ totDF <- data.frame(
   idx = ifelse(!is.na(dat), "est", "pred") # the location with missing y are given the tag prediction
 )
 
+# p1 <- totDF %>% 
+#   ggplot(aes(x = lon, y = lat, color = y), xlim = c(20,55), ylim = c(-130, -60)) +
+#   coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE, clip = "on") +
+#   geom_point(size = .5, alpha = 0.5) +
+#   scale_colour_gradient(
+#     name = "Rain (mm)",
+#     low = "dodgerblue4",
+#     # mid = "olivedrab4",
+#     high = "gold1"
+#   )+
+#   xlab("Longitude") +
+#   ylab("Latitude") +
+#   theme_bw()
+# ggsave(p1, filename =  paste0(outdir, "Desc2.png"))
+
 totDF <- totDF %>%
   mutate(elev = ifelse(elev == -500, 0, elev)) # following the authors' approach we force negative elevation to be zero
 
@@ -131,11 +146,32 @@ res <- inla(formula,
                               restart=TRUE), num.threads = 2)
 
 # save(res, file = paste0(outdir, "res.rda"))
-# load(paste0(outdir, "res.rda"))
+load(paste0(outdir, "res.rda"))
 
 summary(res)
 
-index_est <- inla.stack.index(stk.full, tag = "est")$data
+library(ggplot2)
+alpha <- res$marginals.fixed[[1]]
+ggplot(data.frame(inla.smarginal(alpha)), aes(x, y)) +
+  geom_line() +
+  theme_bw()
+
+library(ggplot2)
+alpha <- res$marginals.fixed[[2]]
+p1 <- ggplot(data.frame(inla.smarginal(alpha)), aes(x, y)) +
+  geom_line() +
+  xlab("Elevation") +
+  theme_bw()
+ggsave(p1, filename =  paste0(outdir, "elevation.png"))
+
+
+marg.variance <- inla.tmarginal(function(x) 1/x,
+                                res$marginals.hyperpar$`Precision for the Gaussian observations`)
+p1 <- ggplot(data.frame(inla.smarginal(marg.variance)), aes(x, y)) +
+  geom_line() +
+  xlab("Marginal variance") +
+  theme_bw()
+ggsave(p1, filename =  paste0(outdir, "Precision.png"))
 
 # We save in separate objects
 ## The mean, 2.5% and 97.5% estimated values at observed locations
@@ -168,7 +204,7 @@ dpm <- rbind(
   ),
   data.frame(
     east = loc_pred[, 1], north = loc_pred[, 2],
-    value = pred_mean, variable = "pred_mean",
+    value = pred_mean, variable = "Mean",
     tag = "pred"
   ),
   data.frame(
@@ -201,28 +237,37 @@ dpm <- dpm %>%
 # ggsave(p, filename =  paste0(outdir, "pred.png"))
 
 # Plot of the predictions
+levels(dpm$variable)[levels(dpm$variable)=="pred_mean"] <- "Mean"
+levels(dpm$variable)[levels(dpm$variable)=="pred_ll"] <- "2.5%"
+levels(dpm$variable)[levels(dpm$variable)=="pred_ul"] <- "97.5%"
+theme_set(theme_minimal())
 p1 <- dpm %>% 
   filter( tag == "pred") %>%
-  ggplot(aes(x = east, y = north, color = value)) +
-  facet_wrap(~variable, nrow = 1) +
-  geom_point(size = 1, alpha = 0.5) +
-  scale_color_gradient(
-    name = "Rain",
-    low = "blue", high = "yellow"
-  ) +
+  ggplot(aes(x = east, y = north, color = value), xlim = c(20,55), ylim = c(-130, -60)) +
+  facet_wrap(~variable, nrow = 2) +
+  coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE, clip = "on") +
+  geom_point(size = .5, alpha = 0.5) +
+  scale_colour_gradient(
+    name = "Rain (mm)",
+    low = "dodgerblue4",
+    # mid = "olivedrab4",
+    high = "gold1"
+  )+
+  xlab("Longitude") +
+  ylab("Latitude") +
   theme_bw()
 ggsave(p1, filename =  paste0(outdir, "predAndCI.png"))
 
-p <- dpm %>% 
-  filter( variable == "pred_mean") %>%
-  ggplot(aes(x = east, y = north, color = value)) +
-  facet_wrap(~variable, nrow = 1) +
-  geom_point(size = 1, alpha = 0.5) +
-  scale_color_gradient(
-    name = "Rainfall",
-    low = "blue", high = "orange"
-  )
-ggsave(p, filename =paste0(outdir,"predPlot.png"))
+# p <- dpm %>% 
+#   filter( variable == "pred_mean") %>%
+#   ggplot(aes(x = east, y = north, color = value)) +
+#   facet_wrap(~variable, nrow = 1) +
+#   geom_point(size = 1, alpha = 0.5) +
+#   scale_color_gradient(
+#     name = "Rainfall",
+#     low = "blue", high = "orange"
+#   )
+# ggsave(p, filename =paste0(outdir,"predPlot.png"))
 
 ## We may also be interested in predicting the random field alone
 rang <- apply(mesh$loc[, c(1, 2)], 2, range)
@@ -251,4 +296,5 @@ gsd <- ggplot(df, aes(x = x, y = y, fill = sd_s)) +
   coord_fixed(ratio = 1) + theme_bw()
 
 spField <- plot_grid(gmean, gsd)
-ggsave(spField, filename =  paste0(outdir, "spatialField.png"))
+ggsave(gmean, filename =  paste0(outdir, "spatialFieldM.png"))
+ggsave(gsd, filename =  paste0(outdir, "spatialFieldSd.png"))

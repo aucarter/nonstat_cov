@@ -34,22 +34,40 @@ d <- dt1981 %>%
   )
 head(d)
 
-# simple mapping
-library(leaflet)
-library(viridis)
-library(htmlwidgets)
-library(webshot)
+outdir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/3rdYear/Winter/STAT517/Final_project/output/"
 
-pal <- colorNumeric("viridis", domain = d$log_ann_prec)
+p1 <- d %>% 
+  ggplot(aes(x = lon, y = lat, color = log_ann_prec), xlim = c(20,55), ylim = c(-130, -60)) +
+  coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE, clip = "on") +
+  geom_point(size = .5, alpha = 0.5) +
+  scale_colour_gradient(
+    name = "Rain (mm)",
+    low = "dodgerblue4",
+    # mid = "olivedrab4",
+    high = "gold1"
+  )+
+  xlab("Longitude") +
+  ylab("Latitude") +
+  theme_bw()
+ggsave(p1, filename =  paste0(outdir, "Desc.png"))
 
-leaflet(d) %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addCircles(lng = ~lon, lat = ~lat, color = ~ pal(log_ann_prec)) %>%
-  addLegend("bottomright",
-            pal = pal, values = ~log_ann_prec,
-            title = "Log precipitation"
-  ) %>%
-  addScaleBar(position = c("bottomleft")) 
+# 
+# # simple mapping
+# library(leaflet)
+# library(viridis)
+# library(htmlwidgets)
+# library(webshot)
+# 
+# pal <- colorNumeric("viridis", domain = d$log_ann_prec)
+# 
+# leaflet(d) %>%
+#   addProviderTiles(providers$CartoDB.Positron) %>%
+#   addCircles(lng = ~lon, lat = ~lat, color = ~ pal(log_ann_prec)) %>%
+#   addLegend("bottomright",
+#             pal = pal, values = ~log_ann_prec,
+#             title = "Log precipitation"
+#   ) %>%
+#   addScaleBar(position = c("bottomleft")) 
 
 
 ##################
